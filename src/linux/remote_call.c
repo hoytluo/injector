@@ -190,6 +190,8 @@ static void print_regs(const injector_t *injector, const struct user_regs_struct
 typedef uint64_t user_reg_t;
 #elif defined(__riscv)
 typedef unsigned long user_reg_t;
+#elif defined(__loongarch64)
+typedef uint64_t user_reg_t;
 #elif defined(__LP64__) && !defined(MUSL_LIBC)
 typedef unsigned long long user_reg_t;
 #elif defined(__i386__)
@@ -424,6 +426,23 @@ int injector__call_syscall(const injector_t *injector, intptr_t *retval, long sy
         regs.a7 = syscall_number;
         reg_return = &regs.a0;
         break;
+#endif
+
+#if defined(__loongarch64)
+	case ARCH_LOONGARCH_64:
+		code.u32[0] = 0x002b0000; /* syscall */
+		code.u32[1] = 0x002a0000; /* break */
+		code_size = 2 * 4;
+		regs.pc = injector->code_addr;
+		regs.gpr[4+0] = arg1;
+		regs.gpr[4+1] = arg2;
+		regs.gpr[4+2] = arg3;
+		regs.gpr[4+3] = arg4;
+		regs.gpr[4+4] = arg5;
+		regs.gpr[4+5] = arg6;
+		regs.gpr[4+7] = syscall_number;
+        reg_return = &regs.gpr[4];
+		break;
 #endif
     default:
         injector__set_errmsg("Unexpected architecture: %s", injector__arch2name(injector->arch));
@@ -712,6 +731,28 @@ int injector__call_function_va_list(const injector_t *injector, intptr_t *retval
         reg_return = &regs.a0;
         break;
 #endif
+#if defined(__loongarch64)
+	case ARCH_LOONGARCH_64:
+		{
+			unsigned int offset = function_addr - injector->code_addr;
+			
+			offset = (offset & 0x3FFFFFF) >> 2;
+			code.u32[0] = 0x54000000  | ((offset & 0xFFFF) << 10)| ((offset & 0xFF0000) >> 16);
+		}
+		code.u32[1] = 0x002a0000; /* break */
+        code_size = 2 * 4;
+		regs.pc = injector->code_addr;
+        regs.gpr[22] = injector->stack + injector->stack_size - 32;	// SP
+		regs.gpr[4+0] = arg1;
+		regs.gpr[4+1] = arg2;
+		regs.gpr[4+2] = arg3;
+		regs.gpr[4+3] = arg4;
+		regs.gpr[4+4] = arg5;
+		regs.gpr[4+5] = arg6;
+        reg_return = &regs.gpr[4];
+		break;
+#endif
+ 
     default:
         injector__set_errmsg("Unexpected architecture: %s", injector__arch2name(injector->arch));
         return -1;

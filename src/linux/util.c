@@ -77,6 +77,8 @@ const char *injector__arch2name(arch_t arch)
         return "RISC-V 64";
     case ARCH_RISCV_32:
         return "RISC-V 32";
+    case ARCH_LOONGARCH_64:
+        return "LOONGARCH 64";
     }
     return "?";
 }

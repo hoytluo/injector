@@ -275,6 +275,12 @@ int injector__collect_libc_information(injector_t *injector)
         injector->sys_munmap = 215;
         break;
 #endif
+    case EM_LOONGARCH:
+        injector->arch = ARCH_LOONGARCH_64;
+        injector->sys_mmap = 222;
+        injector->sys_mprotect = 226;
+        injector->sys_munmap = 215;
+        break;
     default:
         injector__set_errmsg("Unknown target process architecture: 0x%04x", ehdr.e_machine);
         rv = INJERR_UNSUPPORTED_TARGET;

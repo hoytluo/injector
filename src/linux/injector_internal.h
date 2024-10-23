@@ -91,6 +91,7 @@ typedef enum {
     ARCH_POWERPC,
     ARCH_RISCV_64,
     ARCH_RISCV_32,
+	ARCH_LOONGARCH_64,
 } arch_t;
 
 typedef union {
@@ -105,6 +106,8 @@ typedef union {
     uint32_t u32[2];
 #elif defined(__riscv)
     uint32_t u32[2];
+#elif defined(__loongarch64)
+	uint32_t u32[2];
 #endif
     long dummy;
 } code_t;
