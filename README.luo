@@ -1,0 +1,5 @@
+# Loongarch64
+
+指令参考 https://www.kernel.org/doc/html/latest/translations/zh_CN/arch/loongarch/introduction.html
+
+我使用了bl指令，没有使用jirl指令 计算offset的时候花了点时间，需要注意先移位然后高低位互换的情况
